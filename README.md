@@ -70,7 +70,7 @@ Install extras with:
 pip install -r requirements.txt
 ```
 
-The game still works perfectly without colourama; you just won’t get coloured glyphs.
+The game still works perfectly without Colourama; you just won’t get coloured glyphs.
 
 ---
 
@@ -85,6 +85,8 @@ The game still works perfectly without colourama; you just won’t get coloured 
 ```
 
 ---
+## Running the code in Jupyter Notebook
+[![Watch the video](https://i3.ytimg.com/vi/6yaeinD-S-s/maxresdefault.jpg)](https://youtu.be/6yaeinD-S-s)
 
 ## Continuous integration (optional)
 
