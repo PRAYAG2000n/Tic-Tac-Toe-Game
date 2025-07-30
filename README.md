@@ -86,7 +86,7 @@ The game still works perfectly without Colourama; you just won’t get coloured 
 
 ---
 ## Running the code in Jupyter Notebook
-[![Watch the video](https://i3.ytimg.com/vi/6yaeinD-S-s/maxresdefault.jpg)](<iframe width="560" height="315" src="https://www.youtube.com/embed/6yaeinD-S-s?si=VMdHUrEwr9Q78a4D" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>)
+[![Watch the video](https://i3.ytimg.com/vi/6yaeinD-S-s/maxresdefault.jpg)](https://www.youtube.com/watch?v=6yaeinD-S-s)
 
 ## Continuous integration (optional)
 
