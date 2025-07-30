@@ -27,10 +27,10 @@ The code is a single, dependency-light file (`tic_tac_toe_advanced.py`) that sta
 ## Quick start
 
 ```bash
-git clone https://github.com/<your-user>/tic-tac-toe-ai.git
-cd tic-tac-toe-ai
-pip install -r requirements.txt   # optional, adds colour output
-python tic_tac_toe_advanced.py
+git clone https://github.com/PRAYAG2000n/Tic-Tac-Toe-Game.git
+cd Tic-Tac-Toe-Game          # step into the project folder
+pip install -r requirements.txt   # only needed for colour output (colorama)
+python tic_tac_toe_advanced.py    # launch the game
 ```
 
 ### What you’ll see
