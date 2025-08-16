@@ -69,7 +69,7 @@ def draw_board(b: Board) -> str:
     return "\n---+---+---\n".join(rows)
 
 # ---------------------------------------------------------------------------
-# Static evaluator + Minimax with α‑β pruning
+# Static evaluator + Minimax with alpha‑beta pruning
 # ---------------------------------------------------------------------------
 
 def evaluate(b: Board) -> int:
