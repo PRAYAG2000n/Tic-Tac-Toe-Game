@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 """
-Advanced Tic‑Tac‑Toe with Minimax AI and α‑β pruning
+Advanced Tic‑Tac‑Toe with Minimax AI and alpha‑beta pruning
 ===================================================
 
 Features
