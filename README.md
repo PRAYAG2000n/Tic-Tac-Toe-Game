@@ -114,8 +114,3 @@ jobs:
 Bug reports, feature requests, and pull requests are welcome—just open an issue or PR on GitHub.
 ```
 ---
-
-## License
-```
-Feel free to add MIT, Apache 2, or any licence you prefer.
-```
