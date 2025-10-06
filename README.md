@@ -17,7 +17,7 @@ The code is a single, dependency-light file (`tic_tac_toe_advanced.py`) that sta
 | **Three AI levels** | switchable at runtime |
 | **Minimax + alpha-beta pruning** | hard level always plays perfectly |
 | **Depth-limited Minimax** | medium level looks two plies ahead |
-| **AI vs AI demo mode** | pick option 3 → fully automated match |
+| **AI vs AI demo mode** | pick option 3 -> fully automated match |
 | **Scoreboard** | persists across rounds until you quit |
 | **Colour support** | optional, via `colorama`, falls back gracefully |
 | **Clean prompts** | no misaligned boards or confusing input loops |
@@ -77,11 +77,10 @@ The game still works perfectly without Colourama; you just won’t get coloured 
 ## Repository structure
 
 ```
-.
-├── tic_tac_toe_advanced.py   # main (and only) program file
-├── requirements.txt          # optional colour dependency
-├── .gitignore                # ignore __pycache__ etc.
-└── README.md                 # you are here
+|--> tic_tac_toe_advanced.py   # main (and only) program file
+|--> requirements.txt          # optional colour dependency
+|-->.gitignore                # ignore __pycache__ etc.
+|--> README.md                 # you are here
 ```
 
 ---
@@ -107,10 +106,4 @@ jobs:
       - run: printf "3\n3\n" | python tic_tac_toe_advanced.py > /dev/null
 ```
 
----
 
-## Contributing
-```
-Bug reports, feature requests, and pull requests are welcome—just open an issue or PR on GitHub.
-```
----
