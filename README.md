@@ -87,23 +87,4 @@ The game still works perfectly without Colourama; you just won’t get coloured 
 ## Running the code in Jupyter Notebook
 [![Watch the video](https://i3.ytimg.com/vi/6yaeinD-S-s/maxresdefault.jpg)](https://www.youtube.com/watch?v=6yaeinD-S-s)
 
-## Continuous integration (optional)
-
-Add this YAML under `.github/workflows/ci.yml` to run a tiny smoke-test on every push:
-
-```yaml
-name: Tic-Tac-Toe smoke-test
-on: [push, pull_request]
-jobs:
-  run-game:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - run: pip install -r requirements.txt
-      # feed menu choices: 3 (AI vs AI) then 3 (Hard) → game runs headless
-      - run: printf "3\n3\n" | python tic_tac_toe_advanced.py > /dev/null
-```
-
 
