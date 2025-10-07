@@ -1,246 +1,219 @@
-"""
-Advanced Tic‑Tac‑Toe with Minimax AI and alpha‑beta pruning
-===================================================
-
-Features
---------
-* **Play modes**
-  1. Human vs AI (play as **X**)  
-  2. Human vs AI (play as **O**)  
-  3. **AI vs AI** – completely hands‑off; watch two AIs battle it out.
-* **AI difficulty**: easy (random), medium (depth‑2 search), hard (perfect play).
-* **Scoreboard** for the human player (suppressed in AI‑vs‑AI mode).
-* **Fixed‑width board printer** – columns never drift, even with colour codes.
-* Optional **colour output** via `colorama`.
-"""
-
 from __future__ import annotations
-import random, sys
+import random
+import sys
 from typing import List, Optional, Tuple, Dict
 
-# ---------------------------------------------------------------------------
-# Optional colour support
-# ---------------------------------------------------------------------------
+# ----------------------------- optional colours -----------------------------
 try:
-    from colorama import Fore, Style, init as colorama_init  # type: ignore
-    colorama_init()
-    USE_COLOR = True
-except ImportError:  # run fine without colourama
-    USE_COLOR = False
+    from colorama import Fore, Style, init as _cinit  # type: ignore
+    _cinit()
+    _USE_COLOUR = True
+except Exception:
+    _USE_COLOUR = False
 
-# ---------------------------------------------------------------------------
-# Board helpers
-# ---------------------------------------------------------------------------
-Board = List[str]  # flat list of nine "X", "O", or " "
-WIN_LINES = [
+# ------------------------------- basic helpers ------------------------------
+Board = List[str]  # 9 cells, each "X", "O", or " "
+_LINES = [
     (0, 1, 2), (3, 4, 5), (6, 7, 8),  # rows
-    (0, 3, 6), (1, 4, 7), (2, 5, 8),  # columns
-    (0, 4, 8), (2, 4, 6),             # diagonals
+    (0, 3, 6), (1, 4, 7), (2, 5, 8),  # cols
+    (0, 4, 8), (2, 4, 6),             # diags
 ]
 
-def make_empty_board() -> Board:
+def new_board() -> Board:
     return [" "] * 9
 
-def winner(b: Board) -> Optional[str]:
-    for i, j, k in WIN_LINES:
-        if b[i] == b[j] == b[k] != " ":
-            return b[i]
+def won(b: Board) -> Optional[str]:
+    for a, c, d in _LINES:
+        if b[a] == b[c] == b[d] != " ":
+            return b[a]
     return None
 
-def is_full(b: Board) -> bool:
+def full(b: Board) -> bool:
     return " " not in b
 
-# ---------------------------------------------------------------------------
-# Pretty printer with rock‑solid alignment
-# ---------------------------------------------------------------------------
-
-def _style_sq(sq: str) -> str:
-    """Return a *two‑character‑wide* cell string, colourised if available."""
-    if sq == " ":
+# ------------------------------ board printing ------------------------------
+def _paint(mark: str) -> str:
+    """Two-char cell string. ANSI colour if available, but width stays steady."""
+    if mark == " ":
         return "--"
-    cell = sq
-    if USE_COLOR:
-        cell = f"{Fore.RED if sq == 'X' else Fore.BLUE}{sq}{Style.RESET_ALL}"
-    return cell + " "  # pad to width 2
+    if not _USE_COLOUR:
+        return mark + " "
+    col = Fore.RED if mark == "X" else Fore.BLUE
+    return f"{col}{mark}{Style.RESET_ALL} "
 
-def draw_board(b: Board) -> str:
-    cells = [_style_sq(s) for s in b]
-    rows = [" {0}| {1}| {2} ".format(*cells[r:r + 3]) for r in range(0, 9, 3)]
-    return "\n---+---+---\n".join(rows)
+def board_text(b: Board) -> str:
+    cells = [_paint(x) for x in b]
+    rows = [f" {cells[i]}| {cells[i+1]}| {cells[i+2]} " for i in (0, 3, 6)]
+    return "\n---+----+----\n".join(rows)
 
-# ---------------------------------------------------------------------------
-# Static evaluator + Minimax with alpha‑beta pruning
-# ---------------------------------------------------------------------------
+# ---------------------------- evaluation / search ---------------------------
+def score(b: Board) -> int:
+    w = won(b)
+    if w == "X":
+        return 1
+    if w == "O":
+        return -1
+    return 0
 
-def evaluate(b: Board) -> int:
-    w = winner(b)
-    return 1 if w == "X" else -1 if w == "O" else 0
-
-def minimax(b: Board, player: str, alpha: int = -2, beta: int = 2,
-            depth_limit: Optional[int] = None) -> Tuple[int, int]:
-    """Return (best_score, nodes_examined) from position *b* with side *player*."""
+def minimax(b: Board,
+            to_move: str,
+            alpha: int = -2,
+            beta: int = 2,
+            depth: Optional[int] = None) -> Tuple[int, int]:
+    """Return (best_score, nodes_visited) for the side 'to_move'."""
     nodes = 1
-    term = evaluate(b)
-    if term or is_full(b) or depth_limit == 0:
-        return term, nodes
+    terminal = score(b)
+    if terminal or full(b) or depth == 0:
+        return terminal, nodes
 
-    best = -2 if player == "X" else 2
+    best = -2 if to_move == "X" else 2
+    nxt = "O" if to_move == "X" else "X"
+
     for i in range(9):
-        if b[i] == " ":
-            b[i] = player
-            score, sub = minimax(b, "O" if player == "X" else "X",
-                                   alpha, beta,
-                                   None if depth_limit is None else depth_limit - 1)
-            b[i] = " "
-            nodes += sub
-
-            if player == "X":
-                best = max(best, score)
-                alpha = max(alpha, best)
-            else:
-                best = min(best, score)
-                beta = min(beta, best)
-            if beta <= alpha:
-                break  # prune
-    return best, nodes
-
-
-def choose_move(b: Board, player: str, level: str) -> Tuple[int, int]:
-    """Return (square_index, nodes_examined) for *player* using given difficulty."""
-    empties = [i for i, s in enumerate(b) if s == " "]
-    if level == "easy":
-        return random.choice(empties), 1
-    depth_limit = 2 if level == "medium" else None
-
-    best_idx, best_nodes = -1, 0
-    best_score = -2 if player == "X" else 2
-    for i in empties:
-        b[i] = player
-        score, nodes = minimax(b, "O" if player == "X" else "X", depth_limit=depth_limit)
+        if b[i] != " ":
+            continue
+        b[i] = to_move
+        child, sub = minimax(b, nxt, alpha, beta, None if depth is None else depth - 1)
         b[i] = " "
-        if (player == "X" and score > best_score) or (player == "O" and score < best_score):
-            best_score, best_idx, best_nodes = score, i, nodes
-    return best_idx, best_nodes or 1
+        nodes += sub
 
-# ---------------------------------------------------------------------------
-# Console I/O utilities
-# ---------------------------------------------------------------------------
-
-def ask_int(prompt: str, valid: range) -> int:
-    while True:
-        s = input(prompt).strip()
-        if s.isdigit() and int(s) in valid:
-            return int(s)
-        print(f"Invalid choice – enter {valid.start}-{valid.stop - 1}.")
-
-
-def human_turn(b: Board, mark: str) -> None:
-    while True:
-        idx = ask_int(f"Your move ({mark}) 1‑9: ", range(1, 10)) - 1
-        if b[idx] == " ":
-            b[idx] = mark
-            return
-        print("That square is occupied.")
-
-
-def ai_turn(b: Board, mark: str, level: str) -> None:
-    idx, nodes = choose_move(b, mark, level)
-    b[idx] = mark
-    r, c = divmod(idx, 3)
-    print(f"AI ({level}) plays ({r + 1},{c + 1}) – searched {nodes:,} nodes.")
-
-# ---------------------------------------------------------------------------
-# Game orchestration – supports Human vs AI *and* AI vs AI
-# ---------------------------------------------------------------------------
-
-def play(cfg: Dict[str, str], score: Dict[str, int]) -> None:
-    board = make_empty_board()
-    human_mark = cfg["human"]  # "X", "O", or "-" (no human)
-    level = cfg["level"]
-
-    # Mapping from mark → player‑type
-    player_type = {"X": ("human" if human_mark == "X" else "ai"),
-                   "O": ("human" if human_mark == "O" else "ai")}
-
-    current_mark = "X"  # X always starts
-
-    while True:
-        print("\n" + draw_board(board) + "\n")
-
-        if player_type[current_mark] == "human":
-            human_turn(board, current_mark)
+        if to_move == "X":
+            if child > best:
+                best = child
+            if best > alpha:
+                alpha = best
         else:
-            ai_turn(board, current_mark, level)
+            if child < best:
+                best = child
+            if best < beta:
+                beta = best
 
-        # Check for end of game
-        w = winner(board)
-        if w or is_full(board):
-            print("\n" + draw_board(board))
-            if human_mark != "-":  # update scoreboard only in human games
-                if w == human_mark:
-                    print("🎉 You win!")
-                    score["wins"] += 1
-                elif w is None:
-                    print("It's a draw.")
-                    score["draws"] += 1
-                else:
-                    print("🤖 AI wins.")
-                    score["losses"] += 1
-            else:  # AI vs AI summary
-                if w:
-                    print(f"🧠 AI playing '{w}' wins.")
-                else:
-                    print("It's a draw (AI vs AI).")
+        if beta <= alpha:  # prune
             break
 
-        # Switch sides
-        current_mark = "O" if current_mark == "X" else "X"
+    return best, nodes
 
-# ---------------------------------------------------------------------------
-# Menus
-# ---------------------------------------------------------------------------
+def pick_move(b: Board, side: str, level: str) -> Tuple[int, int]:
+    """Choose a move for 'side'. Returns (index, nodes_visited)."""
+    empties = [i for i, v in enumerate(b) if v == " "]
+    if not empties:
+        return -1, 1
 
-def main_menu() -> Dict[str, str]:
-    print("=== Advanced Tic‑Tac‑Toe ===")
-    print("1. Play as X")
-    print("2. Play as O")
-    print("3. Watch AI vs AI")
-    choice = ask_int("Select: ", range(1, 4))
+    if level == "easy":
+        return random.choice(empties), 1
+
+    depth = 2 if level == "medium" else None  # 'hard' uses full search
+    best_i = -1
+    best_nodes = 0
+    best_val = -2 if side == "X" else 2
+    other = "O" if side == "X" else "X"
+
+    for i in empties:
+        b[i] = side
+        val, nodes = minimax(b, other, depth=depth)
+        b[i] = " "
+        if (side == "X" and val > best_val) or (side == "O" and val < best_val):
+            best_val, best_i, best_nodes = val, i, nodes
+
+    return best_i, (best_nodes or 1)
+
+# ------------------------------- user I/O bits ------------------------------
+def ask_int(msg: str, ok: range) -> int:
+    while True:
+        s = input(msg).strip()
+        if s.isdigit() and int(s) in ok:
+            return int(s)
+        print(f"Enter a number in [{ok.start}-{ok.stop - 1}]")
+
+def human_move(b: Board, side: str) -> None:
+    while True:
+        pos = ask_int(f"Your move ({side}) [1-9]: ", range(1, 10)) - 1
+        if b[pos] == " ":
+            b[pos] = side
+            return
+        print("That spot is taken. Try again.")
+
+def ai_move(b: Board, side: str, level: str) -> None:
+    idx, nodes = pick_move(b, side, level)
+    b[idx] = side
+    r, c = divmod(idx, 3)
+    print(f"AI ({level}) played ({r+1},{c+1}) — searched {nodes:,} nodes.")
+
+# -------------------------------- game driver -------------------------------
+def run_game(cfg: Dict[str, str], tally: Dict[str, int]) -> None:
+    board = new_board()
+    who_is_human = cfg["human"]     # "X", "O", or "-" for AI vs AI
+    level = cfg["level"]            # "easy" | "medium" | "hard"
+
+    player_kind = {"X": ("human" if who_is_human == "X" else "ai"),
+                   "O": ("human" if who_is_human == "O" else "ai")}
+    turn = "X"  # X starts
+
+    while True:
+        print("\n" + board_text(board) + "\n")
+
+        if player_kind[turn] == "human":
+            human_move(board, turn)
+        else:
+            ai_move(board, turn, level)
+
+        w = won(board)
+        if w or full(board):
+            print("\n" + board_text(board))
+            if who_is_human == "-":
+                # pure AI match
+                print(f"\nResult: {'draw' if w is None else w + ' wins'} (AI vs AI)")
+            else:
+                if w is None:
+                    print("\nIt's a draw.")
+                    tally["draws"] += 1
+                elif w == who_is_human:
+                    print("\nYou win!")
+                    tally["wins"] += 1
+                else:
+                    print("\nAI wins.")
+                    tally["losses"] += 1
+            break
+
+        turn = "O" if turn == "X" else "X"
+
+# ---------------------------------- menus -----------------------------------
+def choose_setup() -> Dict[str, str]:
+    print("=== Tic-Tac-Toe ===")
+    print("1) Play as X")
+    print("2) Play as O")
+    print("3) Watch AI vs AI")
+    sel = ask_int("Select: ", range(1, 4))
 
     cfg: Dict[str, str] = {"level": "hard"}
-    if choice == 3:
-        cfg.update(human="-")
-    elif choice == 1:
-        cfg.update(human="X")
+    if sel == 1:
+        cfg["human"] = "X"
+    elif sel == 2:
+        cfg["human"] = "O"
     else:
-        cfg.update(human="O")
+        cfg["human"] = "-"
 
     print("\nAI difficulty:")
-    print("1. Easy   (random)")
-    print("2. Medium (depth‑2)")
-    print("3. Hard   (perfect)")
+    print("1) Easy   (random)")
+    print("2) Medium (depth-2)")
+    print("3) Hard   (perfect)")
     lvl = ask_int("Select: ", range(1, 4))
     cfg["level"] = {1: "easy", 2: "medium", 3: "hard"}[lvl]
 
     return cfg
 
-# ---------------------------------------------------------------------------
-# Main loop
-# ---------------------------------------------------------------------------
-
+# ---------------------------------- main ------------------------------------
 def main() -> None:
-    scoreboard = {"wins": 0, "losses": 0, "draws": 0}
-    print("Welcome – press Ctrl+C to quit at any time.")
-
+    scores = {"wins": 0, "losses": 0, "draws": 0}
+    print("Press Ctrl+C to quit.\n")
     while True:
-        cfg = main_menu()
-        play(cfg, scoreboard)
-
-        if cfg["human"] != "-":
-            print(f"\nScore  W:{scoreboard['wins']} L:{scoreboard['losses']} D:{scoreboard['draws']}")
-        if input("Play again? (y/n): ").strip().lower() != "y":
+        setup = choose_setup()
+        run_game(setup, scores)
+        if setup["human"] != "-":
+            print(f"\nScore  W:{scores['wins']}  L:{scores['losses']}  D:{scores['draws']}")
+        again = input("Play again? (y/n): ").strip().lower()
+        if again != "y":
             break
-
 
 if __name__ == "__main__":
     try:
