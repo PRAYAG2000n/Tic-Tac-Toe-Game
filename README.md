@@ -88,3 +88,89 @@ The game still works perfectly without Colourama; you just won’t get coloured 
 [![Watch the video](https://i3.ytimg.com/vi/6yaeinD-S-s/maxresdefault.jpg)](https://www.youtube.com/watch?v=6yaeinD-S-s)
 
 
+## How Output is displayed
+=== Tic-Tac-Toe ===
+1) Play as X
+2) Play as O
+3) Watch AI vs AI
+Select:  2
+
+AI difficulty:
+1) Easy   (random)
+2) Medium (depth-2)
+3) Hard   (perfect)
+Select:  2
+
+ --| --| -- 
+---+----+----
+ --| --| -- 
+---+----+----
+ --| --| -- 
+
+AI (medium) played (1,1) — searched 23 nodes.
+
+ X | --| -- 
+---+----+----
+ --| --| -- 
+---+----+----
+ --| --| -- 
+
+Your move (O) [1-9]:  3
+
+ X | --| O  
+---+----+----
+ --| --| -- 
+---+----+----
+ --| --| -- 
+
+AI (medium) played (1,2) — searched 17 nodes.
+
+ X | X | O  
+---+----+----
+ --| --| -- 
+---+----+----
+ --| --| -- 
+
+Your move (O) [1-9]:  6
+
+ X | X | O  
+---+----+----
+ --| --| O  
+---+----+----
+ --| --| -- 
+
+AI (medium) played (3,3) — searched 13 nodes.
+
+ X | X | O  
+---+----+----
+ --| --| O  
+---+----+----
+ --| --| X  
+
+Your move (O) [1-9]:  5
+
+ X | X | O  
+---+----+----
+ --| O | O  
+---+----+----
+ --| --| X  
+
+AI (medium) played (2,1) — searched 4 nodes.
+
+ X | X | O  
+---+----+----
+ X | O | O  
+---+----+----
+ --| --| X  
+
+Your move (O) [1-9]:  7
+
+ X | X | O  
+---+----+----
+ X | O | O  
+---+----+----
+ O | --| X  
+
+You win!
+
+Score  W:1  L:0  D:0
