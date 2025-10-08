@@ -194,9 +194,9 @@ def choose_setup() -> Dict[str, str]:
         cfg["human"] = "-"
 
     print("\nAI difficulty:")
-    print("1) Easy   (random)")
-    print("2) Medium (depth-2)")
-    print("3) Hard   (perfect)")
+    print("1) Easy")
+    print("2) Medium")
+    print("3) Hard")
     lvl = ask_int("Select: ", range(1, 4))
     cfg["level"] = {1: "easy", 2: "medium", 3: "hard"}[lvl]
 
